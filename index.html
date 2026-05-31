@@ -128,101 +128,118 @@
 
         <!-- 4. TELA DO PAINEL DO ADMINISTRADOR (MKJ) -->
         <section id="screen-admin-panel" class="screen">
-            <div class="admin-header">
-                <div class="admin-title-container">
-                    <div class="user-avatar" style="background: linear-gradient(135deg, var(--violet), #b000ff); box-shadow: 0 0 15px var(--violet-glow);">M</div>
-                    <div>
-                        <div class="admin-subtitle">Console de Controle</div>
-                        <h2 class="admin-title">MKJ ADMIN</h2>
+            <!-- Header do Admin (Alta fidelidade Cyberpunk Mockup) -->
+            <div class="workout-header admin-header-layout">
+                <div class="admin-header-logo-box">
+                    <img src="icon-192.png" alt="Birutinhas Gym Logo" class="admin-header-logo-img">
+                </div>
+                <div class="admin-header-title-container">
+                    <div class="admin-header-badge-row">
+                        <span class="admin-header-b-circle">B</span>
+                        <span class="admin-header-title">BIRUTINHAS GYM <span class="neon-lightning">⚡</span> <span class="text-admin-violet">ADMIN</span></span>
                     </div>
                 </div>
-                <button class="logout-btn" id="btn-admin-logout" title="Sair do admin">
+                <button class="logout-btn admin-logout-btn" id="btn-admin-logout" title="Sair do admin">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
                 </button>
             </div>
 
-            <!-- Seleção de Aluno e Treino para gerenciar -->
-            <div class="login-card" style="border-color: var(--violet); margin-bottom: 20px;">
-                <div class="card-title" style="color: var(--violet); margin-bottom: 15px; font-size: 1.1rem;">
-                    1. Escolha quem e qual Treino Editar
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Selecionar Aluno</label>
-                    <select id="admin-select-user" class="select-cyber">
-                        <option value="DUDA">DUDA</option>
-                        <option value="MAURI">MAURI</option>
-                        <option value="KAUAN">KAUAN</option>
-                        <option value="GABI">GABI</option>
-                    </select>
-                </div>
-                
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label">Selecionar Ficha</label>
-                    <select id="admin-select-tab" class="select-cyber">
-                        <option value="Treino A">Treino A</option>
-                        <option value="Treino B">Treino B</option>
-                        <option value="Treino C">Treino C</option>
-                    </select>
+            <!-- Editor Header com Status -->
+            <div class="admin-editor-title" style="font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; letter-spacing: 2px; color: #fff; margin-bottom: 20px; font-weight: 800; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="letter-spacing: 1.5px; font-size: 1.2rem; font-weight: 800; background: linear-gradient(90deg, #fff, #8e8e9f); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EDITOR DE TREINO</span>
+                <span id="cloud-status-badge" style="font-size: 0.75rem; color: var(--green); font-weight: 800; text-shadow: 0 0 8px var(--green-glow);">🟢 CONECTADO</span>
+            </div>
+
+            <!-- Seleção de Aluno (Custom pills estilo mockup) -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label" style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">ALUNO</label>
+                <div class="admin-selector-row" id="admin-user-selector">
+                    <button type="button" class="selector-pill active" data-value="DUDA">Duda</button>
+                    <button type="button" class="selector-pill" data-value="MAURI">Mauri</button>
+                    <button type="button" class="selector-pill" data-value="KAUAN">Kauan</button>
+                    <button type="button" class="selector-pill" data-value="GABI">Gabi</button>
                 </div>
             </div>
 
-            <!-- Adicionar Exercício Manualmente -->
-            <div class="login-card" style="border-color: rgba(255, 255, 255, 0.1); margin-bottom: 20px;">
-                <div class="card-title" style="font-size: 1.1rem; margin-bottom: 15px;">
-                    2. Adicionar Exercício Manualmente
+            <!-- Seleção de Planilha de Treino (Dropdown customizado de alta fidelidade) -->
+            <div class="form-group" style="margin-bottom: 25px; position: relative;">
+                <label class="form-label" style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">PLANILHA DE TREINO</label>
+                <div class="cyber-dropdown" id="admin-workout-dropdown">
+                    <div class="cyber-dropdown-trigger">
+                        <span id="admin-selected-tab-label">Treino A</span>
+                        <span class="cyber-dropdown-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </span>
+                    </div>
+                    <div class="cyber-dropdown-options">
+                        <div class="cyber-dropdown-option active" data-value="Treino A">Treino A</div>
+                        <div class="cyber-dropdown-option" data-value="Treino B">Treino B</div>
+                        <div class="cyber-dropdown-option" data-value="Treino C">Treino C</div>
+                    </div>
                 </div>
-                
-                <form id="add-exercise-form">
-                    <div class="form-group">
-                        <label class="form-label">Nome do Exercício</label>
-                        <input type="text" id="exercise-name-input" class="input-cyber" placeholder="Ex: Supino Inclinado" required>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1; margin-bottom: 15px;">
-                            <label class="form-label">Séries (Ex: 4)</label>
-                            <input type="text" id="exercise-sets-input" class="input-cyber" placeholder="Séries" required>
-                        </div>
-                        <div class="form-group" style="flex: 1; margin-bottom: 15px;">
-                            <label class="form-label">Repetições (Ex: 12)</label>
-                            <input type="text" id="exercise-reps-input" class="input-cyber" placeholder="Reps" required>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="btn-cyber btn-cyber-violet">
-                        Adicionar ao Treino
-                    </button>
-                </form>
             </div>
 
-            <!-- Lista de Exercícios Atuais (Excluir) -->
-            <div class="login-card" style="border-color: rgba(255, 255, 255, 0.1); margin-bottom: 20px;">
-                <div class="card-title" style="font-size: 1.1rem; margin-bottom: 15px; display: flex; justify-content: space-between; width: 100%;">
-                    <span>3. Exercícios Cadastrados</span>
-                    <span style="color: var(--violet); font-size: 0.8rem; font-weight: 800;" id="admin-title-username">DUDA</span>
-                    <span style="color: var(--cyan); font-size: 0.8rem; font-weight: 800;" id="admin-title-tab">Treino A</span>
+            <!-- Lista de Exercícios (Grid Layout exactly like the mockup!) -->
+            <div style="background: transparent; border: none; padding: 0; margin-bottom: 30px; position: relative; overflow: visible; display: flex; flex-direction: column;">
+                <div class="card-title" style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1.5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>LISTA DE EXERCÍCIOS (<span id="admin-title-tab" style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan-glow);">Treino A</span>)</span>
                 </div>
                 
-                <div id="admin-exercise-list">
+                <!-- O Grid de Cards de Exercícios -->
+                <div id="admin-exercise-grid" class="admin-exercise-grid">
                     <!-- Gerado dinamicamente via JS -->
                 </div>
+
+                <!-- Botão Flutuante circular de Adicionar (+) -->
+                <button type="button" id="btn-open-add-modal" class="floating-add-btn" title="Adicionar Exercício">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
             </div>
 
-            <!-- Seção de Sincronização em Nuvem (Exclusivo MKJ) -->
-            <div class="login-card backup-section" style="border-color: var(--violet); margin-top: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <div class="backup-title" style="margin-bottom: 0;">Sincronização em Nuvem</div>
-                    <div id="cloud-status-badge" style="font-size: 0.75rem; color: var(--green); font-weight: 800; text-shadow: 0 0 5px var(--green-glow);">
-                        🟢 CONECTADO
+            <!-- Modal Dual (Adicionar/Editar Exercício) -->
+            <div id="exercise-modal" class="admin-modal">
+                <div class="admin-modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-title-text">NOVO EXERCÍCIO</h3>
+                        <button type="button" id="btn-close-modal" class="modal-close-btn">&times;</button>
                     </div>
+                    <form id="exercise-form">
+                        <!-- Campo oculto para armazenar o ID do exercício sendo editado -->
+                        <input type="hidden" id="exercise-id-input">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Nome do Exercício</label>
+                            <input type="text" id="exercise-name-input" class="input-cyber" placeholder="Ex: Supino Inclinado" required>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label class="form-label">Séries (Ex: 4)</label>
+                                <input type="text" id="exercise-sets-input" class="input-cyber" placeholder="Séries" required>
+                            </div>
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label class="form-label">Repetições (Ex: 12)</label>
+                                <input type="text" id="exercise-reps-input" class="input-cyber" placeholder="Reps" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="btn-modal-submit" class="btn-cyber btn-cyber-violet" style="margin-top: 10px;">
+                            ADICIONAR AO TREINO 🏋️‍♂️
+                        </button>
+                        
+                        <!-- Botão de Excluir visível apenas no modo edição -->
+                        <button type="button" id="btn-modal-delete" class="btn-cyber btn-outline" style="display: none; border-color: var(--red); color: var(--red); margin-top: 10px; box-shadow: none;">
+                            EXCLUIR EXERCÍCIO 🗑️
+                        </button>
+                    </form>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.3;">
-                    Clique no botão abaixo para publicar todas as alterações de treinos na nuvem. Todos os alunos receberão as atualizações de forma automática ao abrirem o aplicativo conectados à internet!
-                </p>
-                
-                <button type="button" id="btn-save-cloud" class="btn-cyber btn-cyber-violet" style="background: linear-gradient(90deg, var(--violet), #b000ff); box-shadow: 0 0 15px var(--violet-glow); font-weight: 800; font-size: 0.9rem; padding: 14px;">
-                    SALVAR E PUBLICAR NA NUVEM 🌐⚡
+            </div>
+
+            <!-- Botão Fixo de Salvar na Nuvem (Exclusivo MKJ) no final da página -->
+            <div style="margin-top: auto; padding-top: 20px;">
+                <button type="button" id="btn-save-cloud" class="btn-cyber btn-save-cloud-neon" style="background: linear-gradient(90deg, var(--violet), #b000ff); box-shadow: 0 0 20px var(--violet-glow); font-weight: 800; font-size: 1rem; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-lightning" style="color: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan-glow));"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 8.58"></path><path d="m13 11-4 6h6l-4 6"></path></svg>
+                    SALVAR E PUBLICAR NA NUVEM
                 </button>
             </div>
         </section>

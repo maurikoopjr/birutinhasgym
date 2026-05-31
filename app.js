@@ -158,60 +158,193 @@ class GymApp {
             }
         });
 
-        // Eventos do Admin Panel
-        document.getElementById('admin-select-user').addEventListener('change', (e) => {
-            this.adminSelectedUser = e.target.value;
-            this.renderAdminPanel();
-        });
+        // Lógica de Seletores Customizados (Alunos)
+        const userSelector = document.getElementById('admin-user-selector');
+        if (userSelector) {
+            const buttons = userSelector.querySelectorAll('.selector-pill');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.adminSelectedUser = btn.getAttribute('data-value');
+                    this.renderAdminPanel();
+                });
+            });
+        }
 
-        document.getElementById('admin-select-tab').addEventListener('change', (e) => {
-            this.adminSelectedTab = e.target.value;
-            this.renderAdminPanel();
-        });
+        // Lógica do Dropdown Customizado (Planilha de Treino)
+        const workoutDropdown = document.getElementById('admin-workout-dropdown');
+        if (workoutDropdown) {
+            const trigger = workoutDropdown.querySelector('.cyber-dropdown-trigger');
+            const optionsContainer = workoutDropdown.querySelector('.cyber-dropdown-options');
+            const options = workoutDropdown.querySelectorAll('.cyber-dropdown-option');
+            const label = document.getElementById('admin-selected-tab-label');
 
-        // Form de Adicionar Exercício (Admin)
-        const addExerciseForm = document.getElementById('add-exercise-form');
-        addExerciseForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nameInput = document.getElementById('exercise-name-input');
-            const setsInput = document.getElementById('exercise-sets-input');
-            const repsInput = document.getElementById('exercise-reps-input');
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                workoutDropdown.classList.toggle('open');
+            });
 
-            const name = nameInput.value.trim();
-            const sets = setsInput.value.trim();
-            const reps = repsInput.value.trim();
+            options.forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = opt.getAttribute('data-value');
+                    
+                    // Fechar dropdown e atualizar label
+                    workoutDropdown.classList.remove('open');
+                    if (label) label.innerText = val;
+                    
+                    // Atualizar classe ativa das opções
+                    options.forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                    
+                    // Atualizar estado e renderizar
+                    this.adminSelectedTab = val;
+                    const tabTitle = document.getElementById('admin-title-tab');
+                    if (tabTitle) tabTitle.innerText = val;
+                    this.renderAdminPanel();
+                });
+            });
 
-            if (!name || !sets || !reps) {
-                this.showToast("Preencha todos os campos!", "error");
-                return;
+            // Fechar ao clicar fora
+            document.addEventListener('click', () => {
+                workoutDropdown.classList.remove('open');
+            });
+        }
+
+        // Lógica do Modal Dual (Adicionar / Editar)
+        const modal = document.getElementById('exercise-modal');
+        const modalForm = document.getElementById('exercise-form');
+        const modalTitle = document.getElementById('modal-title-text');
+        const modalSubmitBtn = document.getElementById('btn-modal-submit');
+        const modalDeleteBtn = document.getElementById('btn-modal-delete');
+        
+        const nameInput = document.getElementById('exercise-name-input');
+        const setsInput = document.getElementById('exercise-sets-input');
+        const repsInput = document.getElementById('exercise-reps-input');
+        const idInput = document.getElementById('exercise-id-input');
+
+        // Helpers de abrir/fechar modal
+        this.openModal = (mode, exData = null) => {
+            if (!modal) return;
+            
+            if (mode === 'add') {
+                if (modalTitle) modalTitle.innerText = "NOVO EXERCÍCIO";
+                if (modalSubmitBtn) modalSubmitBtn.innerText = "ADICIONAR AO TREINO 🏋️‍♂️";
+                if (modalDeleteBtn) modalDeleteBtn.style.display = "none";
+                
+                // Limpar campos
+                if (idInput) idInput.value = "";
+                if (nameInput) nameInput.value = "";
+                if (setsInput) setsInput.value = "";
+                if (repsInput) repsInput.value = "";
+            } else if (mode === 'edit' && exData) {
+                if (modalTitle) modalTitle.innerText = "EDITAR EXERCÍCIO";
+                if (modalSubmitBtn) modalSubmitBtn.innerText = "SALVAR ALTERAÇÕES 💾";
+                if (modalDeleteBtn) modalDeleteBtn.style.display = "block";
+                
+                // Preencher campos
+                if (idInput) idInput.value = exData.id;
+                if (nameInput) nameInput.value = exData.name;
+                if (setsInput) setsInput.value = exData.sets;
+                if (repsInput) repsInput.value = exData.reps;
             }
+            
+            modal.classList.add('active');
+            if (nameInput) nameInput.focus();
+        };
 
-            const newEx = {
-                id: Math.random().toString(36).substring(2, 9),
-                name: name,
-                sets: sets,
-                reps: reps
-            };
+        this.closeModal = () => {
+            if (modal) modal.classList.remove('active');
+        };
 
-            // Garantir que a estrutura do treino existe
-            if (!this.db[this.adminSelectedUser]) {
-                this.db[this.adminSelectedUser] = {};
-            }
-            if (!this.db[this.adminSelectedUser][this.adminSelectedTab]) {
-                this.db[this.adminSelectedUser][this.adminSelectedTab] = [];
-            }
+        // Eventos para abrir e fechar modal
+        const btnOpenAddModal = document.getElementById('btn-open-add-modal');
+        if (btnOpenAddModal) {
+            btnOpenAddModal.addEventListener('click', () => {
+                this.openModal('add');
+            });
+        }
 
-            this.db[this.adminSelectedUser][this.adminSelectedTab].push(newEx);
-            this.saveDatabase();
-            this.renderAdminPanel();
-            this.showToast("Exercício adicionado!", "success");
+        const btnCloseModal = document.getElementById('btn-close-modal');
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener('click', () => {
+                this.closeModal();
+            });
+        }
 
-            // Limpar formulário
-            nameInput.value = "";
-            setsInput.value = "";
-            repsInput.value = "";
-            nameInput.focus();
-        });
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeModal();
+                }
+            });
+        }
+
+        // Submissão do Form (Dual: Salvar Edição ou Criar Novo)
+        if (modalForm) {
+            modalForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const name = nameInput.value.trim();
+                const sets = setsInput.value.trim();
+                const reps = repsInput.value.trim();
+                const id = idInput.value.trim();
+
+                if (!name || !sets || !reps) {
+                    this.showToast("Preencha todos os campos!", "error");
+                    return;
+                }
+
+                // Garantir que a estrutura do treino existe
+                if (!this.db[this.adminSelectedUser]) {
+                    this.db[this.adminSelectedUser] = {};
+                }
+                if (!this.db[this.adminSelectedUser][this.adminSelectedTab]) {
+                    this.db[this.adminSelectedUser][this.adminSelectedTab] = [];
+                }
+
+                if (id) {
+                    // MODO EDIÇÃO
+                    const exercises = this.db[this.adminSelectedUser][this.adminSelectedTab];
+                    const idx = exercises.findIndex(ex => ex.id === id);
+                    if (idx !== -1) {
+                        exercises[idx] = { id, name, sets, reps };
+                        this.showToast("Exercício atualizado com sucesso! 💾⚡", "success");
+                    }
+                } else {
+                    // MODO ADIÇÃO
+                    const newEx = {
+                        id: Math.random().toString(36).substring(2, 9),
+                        name: name,
+                        sets: sets,
+                        reps: reps
+                    };
+                    this.db[this.adminSelectedUser][this.adminSelectedTab].push(newEx);
+                    this.showToast("Exercício adicionado! 🏋️‍♂️💪", "success");
+                }
+
+                this.saveDatabase();
+                this.renderAdminPanel();
+                this.closeModal();
+            });
+        }
+
+        // Ação de Excluir de dentro do Modal
+        if (modalDeleteBtn) {
+            modalDeleteBtn.addEventListener('click', () => {
+                const id = idInput.value.trim();
+                if (!id) return;
+                
+                this.db[this.adminSelectedUser][this.adminSelectedTab] = 
+                    this.db[this.adminSelectedUser][this.adminSelectedTab].filter(ex => ex.id !== id);
+                
+                this.saveDatabase();
+                this.renderAdminPanel();
+                this.closeModal();
+                this.showToast("Exercício excluído!", "error");
+            });
+        }
 
         // Triggers de alternar telas externas
         document.getElementById('btn-go-admin-login').addEventListener('click', () => {
@@ -370,50 +503,76 @@ class GymApp {
         });
     }
 
-    // Renderiza a Tela do Painel Admin
+    // Renderiza a Tela do Painel Admin (Fidelidade Mockup e Correção de Bugs)
     renderAdminPanel() {
-        const listContainer = document.getElementById('admin-exercise-list');
-        listContainer.innerHTML = "";
+        const gridContainer = document.getElementById('admin-exercise-grid');
+        if (!gridContainer) return;
+        gridContainer.innerHTML = "";
 
         const exercises = this.db[this.adminSelectedUser]?.[this.adminSelectedTab] || [];
 
-        document.getElementById('admin-title-username').innerText = this.adminSelectedUser;
-        document.getElementById('admin-title-tab').innerText = this.adminSelectedTab;
+        // Atualizar aba ativa no título de forma segura
+        const tabTitle = document.getElementById('admin-title-tab');
+        if (tabTitle) tabTitle.innerText = this.adminSelectedTab;
 
         if (exercises.length === 0) {
-            listContainer.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted); padding: 20px;">
-                    Nenhum exercício cadastrado.
+            gridContainer.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 40px 20px; grid-column: span 2; border: 1px dashed var(--border-color); border-radius: 12px; background: rgba(0,0,0,0.15);">
+                    Nenhum exercício cadastrado no ${this.adminSelectedTab} ainda.
                 </div>
             `;
             return;
         }
 
-        exercises.forEach(ex => {
-            const item = document.createElement('div');
-            item.className = "admin-exercise-card";
-            item.innerHTML = `
-                <div>
-                    <div class="admin-exercise-name">${ex.name}</div>
-                    <div class="admin-exercise-meta">${ex.sets} séries x ${ex.reps} repetições</div>
+        exercises.forEach((ex, idx) => {
+            const card = document.createElement('div');
+            card.className = "admin-exercise-card";
+            card.innerHTML = `
+                <button class="card-kebab-btn" title="Excluir Exercício">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                </button>
+                <div class="card-content-wrap">
+                    <div class="card-title">${idx + 1}. ${ex.name}</div>
+                    <div class="card-details-text">${ex.sets} séries | ${ex.reps} reps</div>
+                    <div class="card-badges-row">
+                        <div class="card-badge-item" title="Peso livre / Halteres">
+                            <svg class="badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18.5 5.5 3 3"/><path d="m2.5 15.5 3 3"/><path d="m16 5 3 3"/><path d="m5 16 3 3"/><path d="m7.5 4.5 12 12"/><path d="m4.5 7.5 12 12"/></svg>
+                            <span class="badge-text">Barbell</span>
+                        </div>
+                        <div class="card-badge-item" title="Observações">
+                            <svg class="badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                            <span class="badge-text">Note</span>
+                        </div>
+                        <div class="card-badge-item" title="Repetições">
+                            <svg class="badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            <span class="badge-text">Reps</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="admin-action-btns">
-                    <button class="btn-icon-danger" title="Excluir exercício">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
-                    </button>
-                </div>
+                <button class="card-edit-btn" title="Editar Exercício">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
             `;
 
-            // Remover Exercício
-            item.querySelector('.btn-icon-danger').addEventListener('click', () => {
-                this.db[this.adminSelectedUser][this.adminSelectedTab] = 
-                    this.db[this.adminSelectedUser][this.adminSelectedTab].filter(itemEx => itemEx.id !== ex.id);
-                this.saveDatabase();
-                this.renderAdminPanel();
-                this.showToast("Exercício removido!", "error");
+            // Evento de Editar (Lápis)
+            card.querySelector('.card-edit-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openModal('edit', ex);
             });
 
-            listContainer.appendChild(item);
+            // Evento de Excluir Rápido (Kebab)
+            card.querySelector('.card-kebab-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm(`Excluir o exercício "${ex.name}"?`)) {
+                    this.db[this.adminSelectedUser][this.adminSelectedTab] = 
+                        this.db[this.adminSelectedUser][this.adminSelectedTab].filter(itemEx => itemEx.id !== ex.id);
+                    this.saveDatabase();
+                    this.renderAdminPanel();
+                    this.showToast("Exercício removido!", "error");
+                }
+            });
+
+            gridContainer.appendChild(card);
         });
     }
 
