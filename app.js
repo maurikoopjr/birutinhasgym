@@ -246,23 +246,32 @@ class GymApp {
             }
         });
 
-        document.getElementById('btn-import-json').addEventListener('click', () => {
-            jsonTextarea.value = "";
-            jsonTextarea.placeholder = "Cole aqui o código JSON enviado pelo desenvolvedor e clique novamente em importar...";
-            jsonTextarea.classList.add('active');
-            jsonTextarea.focus();
-            
-            // Se clicar de novo e já tiver texto no campo, tenta realizar a importação
-            document.getElementById('btn-import-json').onclick = () => {
+        const importBtn = document.getElementById('btn-import-json');
+        importBtn.addEventListener('click', () => {
+            if (!jsonTextarea.classList.contains('active')) {
+                // Primeira etapa: abrir campo de texto
+                jsonTextarea.value = "";
+                jsonTextarea.placeholder = "Cole aqui o código JSON enviado pelo desenvolvedor...";
+                jsonTextarea.classList.add('active');
+                jsonTextarea.focus();
+                
+                // Mudar aparência do botão para confirmação
+                importBtn.innerText = "Confirmar Importação";
+                importBtn.classList.remove('btn-cyber-violet');
+                importBtn.style.background = 'linear-gradient(90deg, var(--green), #2ecc71)';
+                importBtn.style.color = '#000';
+                importBtn.style.boxShadow = '0 0 15px var(--green-glow)';
+                this.showToast("Cole o código na caixa abaixo e clique em Confirmar!", "success");
+            } else {
+                // Segunda etapa: importar e processar o texto colado
                 const text = jsonTextarea.value.trim();
                 if (!text) {
-                    this.showToast("Área de texto vazia!", "error");
+                    this.showToast("Cole o código antes de confirmar!", "error");
                     return;
                 }
 
                 try {
                     const parsed = JSON.parse(text);
-                    // Validação simples da estrutura
                     const validKeys = ["DUDA", "MAURI", "KAUAN", "GABI"];
                     const isValid = validKeys.every(k => parsed[k] !== undefined);
 
@@ -270,36 +279,31 @@ class GymApp {
                         this.db = parsed;
                         this.saveDatabase();
                         this.renderAdminPanel();
-                        jsonTextarea.classList.remove('active');
-                        this.showToast("Treinos atualizados com sucesso!", "success");
                         
-                        // Restaura o evento original do botão
-                        this.restoreImportButton();
+                        // Ocultar área de texto
+                        jsonTextarea.classList.remove('active');
+                        jsonTextarea.value = "";
+                        
+                        // Resetar aparência do botão
+                        importBtn.innerText = "Importar Código";
+                        importBtn.style.background = '';
+                        importBtn.style.color = '';
+                        importBtn.style.boxShadow = '';
+                        importBtn.classList.add('btn-cyber-violet');
+                        
+                        this.showToast("Treinos atualizados com sucesso!", "success");
                     } else {
                         this.showToast("Estrutura do JSON inválida!", "error");
                     }
                 } catch (e) {
-                    this.showToast("Erro de formatação no JSON!", "error");
+                    this.showToast("Código incorreto ou incompleto!", "error");
                 }
-            };
+            }
         });
 
         // Limpar inputs de login ao iniciar
         document.getElementById('login-username').value = "";
         document.getElementById('login-password').value = "";
-    }
-
-    restoreImportButton() {
-        const btn = document.getElementById('btn-import-json');
-        btn.onclick = null; // Remove onclick provisório
-        // Reatribui o listener padrão de inicialização
-        btn.addEventListener('click', () => {
-            const jsonTextarea = document.getElementById('json-backup-area');
-            jsonTextarea.value = "";
-            jsonTextarea.placeholder = "Cole aqui o código JSON enviado pelo desenvolvedor...";
-            jsonTextarea.classList.add('active');
-            jsonTextarea.focus();
-        });
     }
 
     // Sair da conta de Usuário
