@@ -863,8 +863,19 @@ class GymApp {
 
     // Cálculo dinâmico e classificação de IMC
     calculateIMC(pesoStr, alturaStr) {
-        const peso = parseFloat(pesoStr?.replace(',', '.'));
-        const altura = parseFloat(alturaStr?.replace(',', '.'));
+        if (!pesoStr || !alturaStr) {
+            return {
+                value: "-",
+                badge: "PENDENTE",
+                class: "imc-normal",
+                desc: "Preencha o peso e a altura no painel de medidas para calcular seu IMC automaticamente."
+            };
+        }
+        
+        const pesoVal = pesoStr.toString().replace(',', '.');
+        const alturaVal = alturaStr.toString().replace(',', '.');
+        const peso = parseFloat(pesoVal);
+        const altura = parseFloat(alturaVal);
         
         if (isNaN(peso) || isNaN(altura) || peso <= 0 || altura <= 0) {
             return {
