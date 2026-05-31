@@ -510,9 +510,6 @@ class GymApp {
 
         fetch('https://kvdb.io/TjvNGqv6NxTK5TM2BBQC95/workouts', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(this.db)
         })
         .then(res => {
