@@ -1,4 +1,4 @@
-const CACHE_NAME = 'birutinhas-gym-v1';
+const CACHE_NAME = 'birutinhas-gym-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -38,34 +38,26 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Evento Fetch: Captura requisições e carrega do cache (Offline-First)
+// Evento Fetch: Network-First (Tenta rede para atualizar sempre, se falhar usa cache)
 self.addEventListener('fetch', event => {
+  // Apenas processa requisições HTTP normais (GET)
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          // Retorna do cache se estiver disponível
-          return cachedResponse;
-        }
-
-        // Caso contrário, tenta buscar da rede
-        return fetch(event.request).then(response => {
-          // Não faz cache de requisições de APIs ou externas dinâmicas que não sejam fontes
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Armazena novos arquivos estáticos requisitados
-          const responseToCache = response.clone();
+    fetch(event.request)
+      .then(networkResponse => {
+        // Se deu certo, clona e atualiza o cache
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, responseToCache);
           });
-
-          return response;
-        }).catch(() => {
-          // Se falhar e estiver offline (e não tiver no cache)
-          console.log('Erro de conexão física e recurso não cacheado.');
-        });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Se falhar (sem internet), busca no cache local
+        return caches.match(event.request);
       })
   );
 });
