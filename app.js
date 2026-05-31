@@ -18,7 +18,7 @@ const DEFAULT_DATABASE = {
         "Treino C": [],
         "medidas": {
             "panturrilha": "34", "coxa": "54", "cintura": "70", "quadril": "95", "peitoral": "88",
-            "antebraço": "24", "biceps": "30", "triceps": "28", "ombro": "100", "peso": "58", "altura": "1.65"
+            "antebraco": "24", "biceps": "30", "triceps": "28", "ombro": "100", "peso": "58", "altura": "1.65"
         }
     },
     "MAURI": {
@@ -39,7 +39,7 @@ const DEFAULT_DATABASE = {
         "Treino C": [],
         "medidas": {
             "panturrilha": "38", "coxa": "60", "cintura": "80", "quadril": "98", "peitoral": "104",
-            "antebraço": "28", "biceps": "36", "triceps": "34", "ombro": "118", "peso": "76.5", "altura": "1.76"
+            "antebraco": "28", "biceps": "36", "triceps": "34", "ombro": "118", "peso": "76.5", "altura": "1.76"
         }
     },
     "KAUAN": {
@@ -58,7 +58,7 @@ const DEFAULT_DATABASE = {
         "Treino C": [],
         "medidas": {
             "panturrilha": "40", "coxa": "62", "cintura": "84", "quadril": "100", "peitoral": "108",
-            "antebraço": "30", "biceps": "38", "triceps": "36", "ombro": "124", "peso": "82", "altura": "1.80"
+            "antebraco": "30", "biceps": "38", "triceps": "36", "ombro": "124", "peso": "82", "altura": "1.80"
         }
     },
     "GABI": {
@@ -77,7 +77,7 @@ const DEFAULT_DATABASE = {
         "Treino C": [],
         "medidas": {
             "panturrilha": "32", "coxa": "50", "cintura": "66", "quadril": "90", "peitoral": "82",
-            "antebraço": "22", "biceps": "26", "triceps": "24", "ombro": "94", "peso": "52", "altura": "1.60"
+            "antebraco": "22", "biceps": "26", "triceps": "24", "ombro": "94", "peso": "52", "altura": "1.60"
         }
     }
 };
@@ -126,7 +126,7 @@ class GymApp {
                         cintura: "",
                         quadril: "",
                         peitoral: "",
-                        antebraço: "",
+                        antebraco: "",
                         biceps: "",
                         triceps: "",
                         ombro: "",
@@ -764,7 +764,7 @@ class GymApp {
                                 cintura: "",
                                 quadril: "",
                                 peitoral: "",
-                                antebraço: "",
+                                antebraco: "",
                                 biceps: "",
                                 triceps: "",
                                 ombro: "",
@@ -907,7 +907,7 @@ class GymApp {
         
         const medidas = this.db[this.currentUser]?.medidas || {
             panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
-            antebraço: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
+            antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
         };
         
         const labels = {
@@ -916,7 +916,7 @@ class GymApp {
             cintura: "Cintura",
             quadril: "Quadril",
             peitoral: "Peitoral",
-            antebraço: "Antebraço",
+            antebraco: "Antebraço",
             biceps: "Bíceps",
             triceps: "Tríceps",
             ombro: "Ombro",
@@ -966,7 +966,7 @@ class GymApp {
             antebraço: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
         };
         
-        const keys = ["panturrilha", "coxa", "cintura", "quadril", "peitoral", "antebraço", "biceps", "triceps", "ombro", "peso", "altura"];
+        const keys = ["panturrilha", "coxa", "cintura", "quadril", "peitoral", "antebraco", "biceps", "triceps", "ombro", "peso", "altura"];
         
         keys.forEach(key => {
             const input = document.getElementById(`m-${key}`);
