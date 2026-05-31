@@ -455,7 +455,7 @@ class GymApp {
         }
 
         // Usamos um bucket exclusivo e seguro no KVDB.io para sincronizar os dados
-        fetch('https://kvdb.io/TjvNGqv6NxTK5TM2BBQC95/workouts')
+        fetch('https://kvdb.io/EK1hddFu2Eg2XpuPrq9Vpz/workouts')
             .then(res => {
                 if (res.status === 404) {
                     // Se o banco ainda não existe na nuvem, inicializa salvando o padrão
@@ -508,7 +508,7 @@ class GymApp {
             btn.style.opacity = "0.7";
         }
 
-        fetch('https://kvdb.io/TjvNGqv6NxTK5TM2BBQC95/workouts', {
+        fetch('https://kvdb.io/EK1hddFu2Eg2XpuPrq9Vpz/workouts', {
             method: 'PUT',
             body: JSON.stringify(this.db)
         })
