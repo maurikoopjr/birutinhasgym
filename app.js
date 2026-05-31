@@ -78,6 +78,9 @@ class GymApp {
 
         this.initDOM();
         this.registerSW();
+
+        // Sincronização automática em segundo plano na abertura
+        this.syncWithCloud(true);
     }
 
     // Carregar Banco de Dados do LocalStorage (Offline-First)
@@ -228,78 +231,36 @@ class GymApp {
             this.logoutUser();
         });
 
-        // Import & Export JSON Triggers
-        const jsonTextarea = document.getElementById('json-backup-area');
-        
-        document.getElementById('btn-export-json').addEventListener('click', () => {
-            const dataStr = JSON.stringify(this.db, null, 2);
-            jsonTextarea.value = dataStr;
-            jsonTextarea.classList.add('active');
-            jsonTextarea.select();
-            
-            // Tenta copiar para área de transferência automaticamente
-            try {
-                navigator.clipboard.writeText(dataStr);
-                this.showToast("JSON copiado para a área de transferência!", "success");
-            } catch (err) {
-                this.showToast("Código gerado abaixo. Copie o texto!", "success");
-            }
-        });
+        // Configuração de Sincronização em Nuvem (Botão e Status)
+        const saveCloudBtn = document.getElementById('btn-save-cloud');
+        const statusBadge = document.getElementById('cloud-status-badge');
 
-        const importBtn = document.getElementById('btn-import-json');
-        importBtn.addEventListener('click', () => {
-            if (!jsonTextarea.classList.contains('active')) {
-                // Primeira etapa: abrir campo de texto
-                jsonTextarea.value = "";
-                jsonTextarea.placeholder = "Cole aqui o código JSON enviado pelo desenvolvedor...";
-                jsonTextarea.classList.add('active');
-                jsonTextarea.focus();
-                
-                // Mudar aparência do botão para confirmação
-                importBtn.innerText = "Confirmar Importação";
-                importBtn.classList.remove('btn-cyber-violet');
-                importBtn.style.background = 'linear-gradient(90deg, var(--green), #2ecc71)';
-                importBtn.style.color = '#000';
-                importBtn.style.boxShadow = '0 0 15px var(--green-glow)';
-                this.showToast("Cole o código na caixa abaixo e clique em Confirmar!", "success");
+        const updateConnectionStatus = () => {
+            if (navigator.onLine) {
+                if (statusBadge) {
+                    statusBadge.innerText = "🟢 CONECTADO";
+                    statusBadge.style.color = "var(--green)";
+                    statusBadge.style.textShadow = "0 0 5px var(--green-glow)";
+                }
             } else {
-                // Segunda etapa: importar e processar o texto colado
-                const text = jsonTextarea.value.trim();
-                if (!text) {
-                    this.showToast("Cole o código antes de confirmar!", "error");
-                    return;
-                }
-
-                try {
-                    const parsed = JSON.parse(text);
-                    const validKeys = ["DUDA", "MAURI", "KAUAN", "GABI"];
-                    const isValid = validKeys.every(k => parsed[k] !== undefined);
-
-                    if (isValid) {
-                        this.db = parsed;
-                        this.saveDatabase();
-                        this.renderAdminPanel();
-                        
-                        // Ocultar área de texto
-                        jsonTextarea.classList.remove('active');
-                        jsonTextarea.value = "";
-                        
-                        // Resetar aparência do botão
-                        importBtn.innerText = "Importar Código";
-                        importBtn.style.background = '';
-                        importBtn.style.color = '';
-                        importBtn.style.boxShadow = '';
-                        importBtn.classList.add('btn-cyber-violet');
-                        
-                        this.showToast("Treinos atualizados com sucesso!", "success");
-                    } else {
-                        this.showToast("Estrutura do JSON inválida!", "error");
-                    }
-                } catch (e) {
-                    this.showToast("Código incorreto ou incompleto!", "error");
+                if (statusBadge) {
+                    statusBadge.innerText = "🔴 OFFLINE";
+                    statusBadge.style.color = "var(--red)";
+                    statusBadge.style.textShadow = "0 0 5px rgba(255, 0, 85, 0.4)";
                 }
             }
-        });
+        };
+
+        // Escutar status de conexão nativa do celular
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        updateConnectionStatus(); // Checar status inicial
+
+        if (saveCloudBtn) {
+            saveCloudBtn.addEventListener('click', () => {
+                this.saveToCloud(false);
+            });
+        }
 
         // Limpar inputs de login ao iniciar
         document.getElementById('login-username').value = "";
@@ -324,6 +285,9 @@ class GymApp {
         this.showToast(`Bem-vindo, ${user}! ⚡`, "success");
         this.renderWorkoutTabs();
         this.renderWorkoutExercises();
+
+        // Sincronizar em segundo plano imediatamente para ver se há novidades
+        this.syncWithCloud(true);
     }
 
     // Controle de Exibição de Telas
@@ -481,6 +445,94 @@ class GymApp {
                     .catch(err => console.warn('Falha ao registrar Service Worker:', err));
             });
         }
+    }
+
+    // Sincroniza o banco de dados local com a nuvem (KVDB)
+    syncWithCloud(silent = false) {
+        if (!navigator.onLine) {
+            if (!silent) this.showToast("Você está offline. Usando treinos locais.", "error");
+            return;
+        }
+
+        // Usamos um bucket exclusivo e seguro no KVDB.io para sincronizar os dados
+        fetch('https://kvdb.io/B1zF9n3mZ3x7s2t9y6wK1L/workouts')
+            .then(res => {
+                if (res.status === 404) {
+                    // Se o banco ainda não existe na nuvem, inicializa salvando o padrão
+                    this.saveToCloud(true);
+                    throw new Error("Banco vazio na nuvem, inicializando...");
+                }
+                return res.json();
+            })
+            .then(data => {
+                const validKeys = ["DUDA", "MAURI", "KAUAN", "GABI"];
+                const isValid = validKeys.every(k => data[k] !== undefined);
+
+                if (isValid) {
+                    const oldStr = JSON.stringify(this.db);
+                    const newStr = JSON.stringify(data);
+                    
+                    if (oldStr !== newStr) {
+                        this.db = data;
+                        this.saveDatabase();
+                        
+                        // Atualizar as telas que estão ativas na hora
+                        if (this.currentUser) {
+                            this.renderWorkoutTabs();
+                            this.renderWorkoutExercises();
+                        }
+                        if (this.screens.adminPanel.classList.contains('active')) {
+                            this.renderAdminPanel();
+                        }
+                        
+                        if (!silent) this.showToast("Treinos atualizados da nuvem! ⚡", "success");
+                    }
+                }
+            })
+            .catch(err => {
+                console.log("Status de sincronização da nuvem:", err.message);
+            });
+    }
+
+    // Publica o banco de dados local na nuvem (KVDB)
+    saveToCloud(silent = false) {
+        if (!navigator.onLine) {
+            this.showToast("Sem conexão com a internet para salvar na nuvem!", "error");
+            return;
+        }
+
+        const btn = document.getElementById('btn-save-cloud');
+        if (btn && !silent) {
+            btn.innerText = "Publicando na Nuvem... ⏳";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+        }
+
+        fetch('https://kvdb.io/B1zF9n3mZ3x7s2t9y6wK1L/workouts', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.db)
+        })
+        .then(res => {
+            if (res.ok) {
+                if (!silent) this.showToast("Treinos publicados na nuvem com sucesso! 🌐⚡", "success");
+            } else {
+                throw new Error("Erro de resposta do servidor.");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (!silent) this.showToast("Erro ao salvar dados na nuvem!", "error");
+        })
+        .finally(() => {
+            if (btn && !silent) {
+                btn.innerText = "SALVAR E PUBLICAR NA NUVEM 🌐⚡";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        });
     }
 }
 
