@@ -1,4 +1,4 @@
-const CACHE_NAME = 'birutinhas-gym-v13';
+const CACHE_NAME = 'birutinhas-gym-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './capy-suffering.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap'
 ];
 

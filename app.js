@@ -196,23 +196,25 @@ class GymApp {
             const adminPass = document.getElementById('admin-password').value;
 
             if (adminUser === "mkj" && adminPass === "1234") {
-                this.showScreen('adminPanel');
-                this.showToast("Logado como Administrador!", "success");
-                
-                // Resetar o controle de abas do editor admin para Exercícios ao logar
-                const btnAdminWorkouts = document.getElementById('btn-admin-show-workouts');
-                const btnAdminMeasurements = document.getElementById('btn-admin-show-measurements');
-                const viewAdminWorkouts = document.getElementById('admin-workouts-view');
-                const viewAdminMeasurements = document.getElementById('admin-measurements-view');
-                
-                if (btnAdminWorkouts && btnAdminMeasurements && viewAdminWorkouts && viewAdminMeasurements) {
-                    btnAdminWorkouts.classList.add('active');
-                    btnAdminMeasurements.classList.remove('active');
-                    viewAdminWorkouts.classList.add('active');
-                    viewAdminMeasurements.classList.remove('active');
-                }
-                
-                this.renderAdminPanel();
+                this.triggerCapyLoadingOverlay(() => {
+                    this.showScreen('adminPanel');
+                    this.showToast("Logado como Administrador!", "success");
+                    
+                    // Resetar o controle de abas do editor admin para Exercícios ao logar
+                    const btnAdminWorkouts = document.getElementById('btn-admin-show-workouts');
+                    const btnAdminMeasurements = document.getElementById('btn-admin-show-measurements');
+                    const viewAdminWorkouts = document.getElementById('admin-workouts-view');
+                    const viewAdminMeasurements = document.getElementById('admin-measurements-view');
+                    
+                    if (btnAdminWorkouts && btnAdminMeasurements && viewAdminWorkouts && viewAdminMeasurements) {
+                        btnAdminWorkouts.classList.add('active');
+                        btnAdminMeasurements.classList.remove('active');
+                        viewAdminWorkouts.classList.add('active');
+                        viewAdminMeasurements.classList.remove('active');
+                    }
+                    
+                    this.renderAdminPanel();
+                });
             } else {
                 this.showToast("Credenciais incorretas!", "error");
             }
@@ -520,33 +522,35 @@ class GymApp {
         document.getElementById('login-password').value = "";
     }
 
-    // Logar Usuário com redefinição de abas ativa
+    // Logar Aluno acionando a animação da Capivara Sofrendo
     loginUser(user) {
-        this.currentUser = user;
-        document.getElementById('user-avatar-initial').innerText = user.charAt(0);
-        document.getElementById('user-name-span').innerText = user;
-        this.currentTab = "Treino A";
-        this.showScreen('workout');
-        this.showToast(`Bem-vindo, ${user}! ⚡`, "success");
-        
-        // Resetar o controle de abas segmentadas para Treinos ao logar
-        const btnWorkouts = document.getElementById('btn-show-workouts');
-        const btnMeasurements = document.getElementById('btn-show-measurements');
-        const viewStudentWorkouts = document.getElementById('student-workouts-view');
-        const viewStudentMeasurements = document.getElementById('student-measurements-view');
-        
-        if (btnWorkouts && btnMeasurements && viewStudentWorkouts && viewStudentMeasurements) {
-            btnWorkouts.classList.add('active');
-            btnMeasurements.classList.remove('active');
-            viewStudentWorkouts.classList.add('active');
-            viewStudentMeasurements.classList.remove('active');
-        }
+        this.triggerCapyLoadingOverlay(() => {
+            this.currentUser = user;
+            document.getElementById('user-avatar-initial').innerText = user.charAt(0);
+            document.getElementById('user-name-span').innerText = user;
+            this.currentTab = "Treino A";
+            this.showScreen('workout');
+            this.showToast(`Bem-vindo, ${user}! ⚡`, "success");
+            
+            // Resetar o controle de abas segmentadas para Treinos ao logar
+            const btnWorkouts = document.getElementById('btn-show-workouts');
+            const btnMeasurements = document.getElementById('btn-show-measurements');
+            const viewStudentWorkouts = document.getElementById('student-workouts-view');
+            const viewStudentMeasurements = document.getElementById('student-measurements-view');
+            
+            if (btnWorkouts && btnMeasurements && viewStudentWorkouts && viewStudentMeasurements) {
+                btnWorkouts.classList.add('active');
+                btnMeasurements.classList.remove('active');
+                viewStudentWorkouts.classList.add('active');
+                viewStudentMeasurements.classList.remove('active');
+            }
 
-        this.renderWorkoutTabs();
-        this.renderWorkoutExercises();
+            this.renderWorkoutTabs();
+            this.renderWorkoutExercises();
 
-        // Sincronizar em segundo plano imediatamente para ver se há novidades
-        this.syncWithCloud(true);
+            // Sincronizar em segundo plano imediatamente para ver se há novidades
+            this.syncWithCloud(true);
+        });
     }
 
     // Controle de Exibição de Telas
@@ -640,6 +644,12 @@ class GymApp {
         // Atualizar aba ativa no título de forma segura
         const tabTitle = document.getElementById('admin-title-tab');
         if (tabTitle) tabTitle.innerText = this.adminSelectedTab;
+
+        // Recarregar o formulário de medidas ao mudar de aluno se a aba de medidas estiver ativa
+        const viewAdminMeasurements = document.getElementById('admin-measurements-view');
+        if (viewAdminMeasurements && viewAdminMeasurements.classList.contains('active')) {
+            this.renderAdminMeasurementsForm();
+        }
 
         if (exercises.length === 0) {
             gridContainer.innerHTML = `
@@ -963,7 +973,7 @@ class GymApp {
         
         const medidas = this.db[this.adminSelectedUser]?.medidas || {
             panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
-            antebraço: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
+            antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
         };
         
         const keys = ["panturrilha", "coxa", "cintura", "quadril", "peitoral", "antebraco", "biceps", "triceps", "ombro", "peso", "altura"];
@@ -1005,6 +1015,44 @@ class GymApp {
             <div class="imc-value-display">${imcInfo.value}</div>
             <p class="imc-desc" style="font-size: 0.78rem; margin-top: 4px;">Alterações salvas localmente ao digitar. Clique no botão de Salvar no final da página para publicar as alterações na Nuvem.</p>
         `;
+    }
+
+    // Gerencia o overlay hilarante de carregamento da Capivara Sofrendo
+    triggerCapyLoadingOverlay(onComplete) {
+        const overlay = document.getElementById('capy-loading-overlay');
+        const messageEl = document.getElementById('capy-loading-message');
+        if (!overlay) {
+            onComplete();
+            return;
+        }
+
+        const messages = [
+            "CARREGANDO FICHA... (E SOFRENDO COMO ESSA CAPIVARA) 🥵🏋️‍♂️",
+            "INICIANDO MODO SOFRIMENTO COM PESOS... 💀🏋️‍♂️",
+            "A CAPIVARA JÁ TÁ CHORANDO, AGORA É SUA VEZ! 😭🏋️‍♂️",
+            "CALIBRANDO OS MÚSCULOS... PREPARA O LOMBAR! 🥵",
+            "PROCURANDO FORÇAS DO ALÉM PARA ESSE AGACHAMENTO... 🧠⚡",
+            "LEVANTANDO PESO DE VERDADE... OU QUASE ISSO! 🏋️‍♂️💀"
+        ];
+
+        // Escolher frase de sofrimento aleatória hilarante
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        if (messageEl) messageEl.innerText = randomMsg;
+
+        // Limpar estados antigos e ativar overlay
+        overlay.classList.remove('fade-out');
+        overlay.classList.add('active');
+
+        // Aguardar exatamente 5 segundos de carregamento / sofrimento
+        setTimeout(() => {
+            // Iniciar o efeito fade-out suave de 500ms
+            overlay.classList.add('fade-out');
+            
+            setTimeout(() => {
+                overlay.classList.remove('active', 'fade-out');
+                onComplete(); // Seguir com o login real!
+            }, 500);
+        }, 5000);
     }
 }
 

@@ -1439,3 +1439,125 @@ body {
     background: rgba(0,0,0,0.5);
 }
 
+/* ==========================================================================
+   OVERLAY HILARANTE DA CAPIVARA SOFRENDO (CARREGAMENTO DE LOGIN)
+   ========================================================================== */
+
+.capy-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #050508;
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(15px);
+    transition: opacity 0.5s ease;
+    opacity: 0;
+}
+
+.capy-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.capy-overlay.fade-out {
+    opacity: 0;
+}
+
+.capy-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Vibração dramática da capivara sofrendo */
+.capy-shaker {
+    animation: capyShake 0.12s infinite alternate;
+}
+
+.capy-suffering-img {
+    width: 260px;
+    height: 260px;
+    object-fit: contain;
+    border-radius: 24px;
+    border: 2px solid var(--violet);
+    box-shadow: 0 0 30px rgba(208, 0, 255, 0.35);
+    margin-bottom: 25px;
+    background: rgba(15, 15, 22, 0.95);
+    padding: 5px;
+}
+
+/* Texto piscando em neon Cyberpunk */
+.capy-loading-text-glow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 25px;
+    line-height: 1.4;
+    animation: textGlowPulse 1.2s infinite;
+}
+
+/* Barra de progresso de alta fidelidade */
+.capy-progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.capy-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 10px;
+}
+
+.capy-overlay.active .capy-progress-bar-fill {
+    animation: progressFill 5s linear forwards;
+}
+
+/* Keyframes das Animações */
+@keyframes capyShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+@keyframes textGlowPulse {
+    0%, 100% { 
+        text-shadow: 0 0 10px var(--violet-glow); 
+        color: #fff; 
+    }
+    50% { 
+        text-shadow: 0 0 25px var(--violet), 0 0 10px var(--cyan); 
+        color: var(--cyan); 
+    }
+}
+
+@keyframes progressFill {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+
