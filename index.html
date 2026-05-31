@@ -85,14 +85,42 @@
                 </button>
             </div>
 
-            <!-- Seleção de Abas (Treino A, B, C) -->
-            <div class="workout-tabs" id="workout-tabs-container">
-                <!-- Inserido dinamicamente via JS -->
+            <!-- Controle de Abas Principal Aluno (Treino vs Medidas) -->
+            <div class="main-segmented-control" style="margin-bottom: 20px;">
+                <button type="button" class="segmented-btn active" id="btn-show-workouts">Treino Ficha</button>
+                <button type="button" class="segmented-btn" id="btn-show-measurements">Minhas Medidas</button>
             </div>
 
-            <!-- Lista de Exercícios -->
-            <div class="exercise-list" id="workout-exercise-list">
-                <!-- Inserido dinamicamente via JS -->
+            <!-- 2.1 View de Exercícios (Treinos) -->
+            <div id="student-workouts-view" class="segmented-view active">
+                <!-- Seleção de Abas (Treino A, B, C) -->
+                <div class="workout-tabs" id="workout-tabs-container">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+
+                <!-- Lista de Exercícios -->
+                <div class="exercise-list" id="workout-exercise-list">
+                    <!-- Inserido dinamicamente via JS -->
+                </div>
+            </div>
+
+            <!-- 2.2 View de Medidas Corporais -->
+            <div id="student-measurements-view" class="segmented-view">
+                <!-- Tabela de Medidas Corporais -->
+                <div class="login-card" style="margin-bottom: 20px;">
+                    <div class="card-title" style="font-size: 1rem; color: var(--cyan); text-shadow: 0 0 5px var(--cyan-glow);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler"><path d="M5 19 19 5"></path><path d="M11 7.5 9.5 9"></path><path d="m14 10.5-1.5 1.5"></path><path d="m17 13.5-1.5 1.5"></path><path d="M9.5 14.5 8 16"></path></svg>
+                        Evolução de Medidas
+                    </div>
+                    <div class="measurements-grid" id="student-measurements-grid">
+                        <!-- Preenchido dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <!-- Painel de IMC do Aluno -->
+                <div class="login-card imc-result-card" id="student-imc-card">
+                    <!-- Preenchido dinamicamente via JS -->
+                </div>
             </div>
         </section>
 
@@ -161,39 +189,112 @@
                 </div>
             </div>
 
-            <!-- Seleção de Planilha de Treino (Dropdown customizado de alta fidelidade) -->
-            <div class="form-group" style="margin-bottom: 25px; position: relative;">
-                <label class="form-label" style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">PLANILHA DE TREINO</label>
-                <div class="cyber-dropdown" id="admin-workout-dropdown">
-                    <div class="cyber-dropdown-trigger">
-                        <span id="admin-selected-tab-label">Treino A</span>
-                        <span class="cyber-dropdown-arrow">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </span>
+            <!-- Controle de Abas Principal Admin (Editar Ficha vs Editar Medidas) -->
+            <div class="main-segmented-control admin-segmented-control" style="margin-bottom: 20px;">
+                <button type="button" class="segmented-btn active" id="btn-admin-show-workouts">Editar Ficha</button>
+                <button type="button" class="segmented-btn" id="btn-admin-show-measurements">Editar Medidas</button>
+            </div>
+
+            <!-- 4.1 View de Edição de Exercícios (Treinos) -->
+            <div id="admin-workouts-view" class="segmented-view active">
+                <!-- Seleção de Planilha de Treino (Dropdown customizado de alta fidelidade) -->
+                <div class="form-group" style="margin-bottom: 25px; position: relative;">
+                    <label class="form-label" style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">PLANILHA DE TREINO</label>
+                    <div class="cyber-dropdown" id="admin-workout-dropdown">
+                        <div class="cyber-dropdown-trigger">
+                            <span id="admin-selected-tab-label">Treino A</span>
+                            <span class="cyber-dropdown-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </div>
+                        <div class="cyber-dropdown-options">
+                            <div class="cyber-dropdown-option active" data-value="Treino A">Treino A</div>
+                            <div class="cyber-dropdown-option" data-value="Treino B">Treino B</div>
+                            <div class="cyber-dropdown-option" data-value="Treino C">Treino C</div>
+                        </div>
                     </div>
-                    <div class="cyber-dropdown-options">
-                        <div class="cyber-dropdown-option active" data-value="Treino A">Treino A</div>
-                        <div class="cyber-dropdown-option" data-value="Treino B">Treino B</div>
-                        <div class="cyber-dropdown-option" data-value="Treino C">Treino C</div>
+                </div>
+
+                <!-- Lista de Exercícios (Grid Layout) -->
+                <div style="background: transparent; border: none; padding: 0; margin-bottom: 30px; position: relative; overflow: visible; display: flex; flex-direction: column;">
+                    <div class="card-title" style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1.5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>LISTA DE EXERCÍCIOS (<span id="admin-title-tab" style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan-glow);">Treino A</span>)</span>
                     </div>
+                    
+                    <!-- O Grid de Cards de Exercícios -->
+                    <div id="admin-exercise-grid" class="admin-exercise-grid">
+                        <!-- Gerado dinamicamente via JS -->
+                    </div>
+
+                    <!-- Botão Flutuante circular de Adicionar (+) -->
+                    <button type="button" id="btn-open-add-modal" class="floating-add-btn" title="Adicionar Exercício">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- Lista de Exercícios (Grid Layout exactly like the mockup!) -->
-            <div style="background: transparent; border: none; padding: 0; margin-bottom: 30px; position: relative; overflow: visible; display: flex; flex-direction: column;">
-                <div class="card-title" style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1.5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <span>LISTA DE EXERCÍCIOS (<span id="admin-title-tab" style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan-glow);">Treino A</span>)</span>
-                </div>
-                
-                <!-- O Grid de Cards de Exercícios -->
-                <div id="admin-exercise-grid" class="admin-exercise-grid">
-                    <!-- Gerado dinamicamente via JS -->
+            <!-- 4.2 View de Edição de Medidas Corporais -->
+            <div id="admin-measurements-view" class="segmented-view">
+                <div class="login-card" style="margin-bottom: 20px; border-color: rgba(208, 0, 255, 0.2);">
+                    <div class="card-title" style="font-size: 1rem; color: var(--violet); text-shadow: 0 0 5px var(--violet-glow);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-ruler"><path d="m15 5 4 4"></path><path d="M13 7 8.7 11.3a2 2 0 0 0-.6 1.4l-.2 2.9 2.9-.2a2 2 0 0 0 1.4-.6L16.5 10.5"></path><path d="m9 18 9-9"></path><path d="M12.5 4.5 18 10"></path></svg>
+                        Histórico de Medidas (Editor)
+                    </div>
+                    
+                    <form id="admin-measurements-form">
+                        <div class="admin-measurements-inputs-grid">
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Panturrilha (cm)</label>
+                                <input type="text" id="m-panturrilha" class="input-cyber compact-input" placeholder="ex: 38">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Coxa (cm)</label>
+                                <input type="text" id="m-coxa" class="input-cyber compact-input" placeholder="ex: 60">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Cintura (cm)</label>
+                                <input type="text" id="m-cintura" class="input-cyber compact-input" placeholder="ex: 82">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Quadril (cm)</label>
+                                <input type="text" id="m-quadril" class="input-cyber compact-input" placeholder="ex: 98">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Peitoral (cm)</label>
+                                <input type="text" id="m-peitoral" class="input-cyber compact-input" placeholder="ex: 104">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Antebraço (cm)</label>
+                                <input type="text" id="m-antebraço" class="input-cyber compact-input" placeholder="ex: 28">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Bíceps (cm)</label>
+                                <input type="text" id="m-biceps" class="input-cyber compact-input" placeholder="ex: 38">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Tríceps (cm)</label>
+                                <input type="text" id="m-triceps" class="input-cyber compact-input" placeholder="ex: 36">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Ombro (cm)</label>
+                                <input type="text" id="m-ombro" class="input-cyber compact-input" placeholder="ex: 120">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Peso (kg)</label>
+                                <input type="text" id="m-peso" class="input-cyber compact-input" placeholder="ex: 78.5">
+                            </div>
+                            <div class="form-group compact-group">
+                                <label class="form-label compact-label">Altura (m)</label>
+                                <input type="text" id="m-altura" class="input-cyber compact-input" placeholder="ex: 1.78">
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- Botão Flutuante circular de Adicionar (+) -->
-                <button type="button" id="btn-open-add-modal" class="floating-add-btn" title="Adicionar Exercício">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
+                <!-- Painel de Feedback IMC Live para o Admin -->
+                <div class="login-card imc-result-card" id="admin-imc-live-card" style="margin-bottom: 20px;">
+                    <!-- Atualizado ao vivo via JS -->
+                </div>
             </div>
 
             <!-- Modal Dual (Adicionar/Editar Exercício) -->

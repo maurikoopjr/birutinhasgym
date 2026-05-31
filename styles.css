@@ -1190,3 +1190,252 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* ==========================================================================
+   MÓDULO DE MEDIDAS CORPORAIS & IMC - CYBERPUNK NEON
+   ========================================================================== */
+
+/* 1. Controle Segmentado de Abas (Aparência de Switch de Alta Tecnologia) */
+.main-segmented-control {
+    display: flex;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 22px;
+    gap: 4px;
+}
+
+.segmented-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 11px;
+    border-radius: 7px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.segmented-btn:active {
+    transform: scale(0.98);
+}
+
+/* Cor ativa Violeta para o Administrador */
+.admin-segmented-control .segmented-btn.active {
+    background: var(--violet-low);
+    color: #fff;
+    border: 1px solid var(--violet);
+    box-shadow: 0 0 12px var(--violet-glow);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Cor ativa Ciano para os Alunos */
+#btn-show-workouts.segmented-btn.active,
+#btn-show-measurements.segmented-btn.active {
+    background: var(--cyan-low);
+    color: #fff;
+    border: 1px solid var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+.segmented-view {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.segmented-view.active {
+    display: flex;
+}
+
+/* 2. Grade de Exibição de Medidas do Aluno */
+.measurements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.measurement-item-box {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.measurement-item-box:hover {
+    border-color: rgba(0, 240, 255, 0.15);
+    background: rgba(0, 240, 255, 0.01);
+}
+
+.measurement-item-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.measurement-item-value {
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Share Tech Mono', monospace;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
+}
+
+/* 3. Painel de IMC (Classificação e Brilho Condicional) */
+.imc-result-card {
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+}
+
+.imc-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.imc-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 800;
+}
+
+.imc-value-display {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.imc-status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
+}
+
+.imc-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-top: 4px;
+}
+
+/* Classes Neon para IMC */
+.imc-under {
+    border-color: #00bfff !important;
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.08) inset, 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.imc-under .imc-value-display,
+.imc-under .imc-status-badge {
+    color: #00bfff;
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.35);
+}
+.imc-under .imc-status-badge {
+    background: rgba(0, 191, 255, 0.08);
+    border: 1px solid rgba(0, 191, 255, 0.2);
+}
+
+.imc-normal {
+    border-color: var(--cyan) !important;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.08) inset, 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.imc-normal .imc-value-display,
+.imc-normal .imc-status-badge {
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+}
+.imc-normal .imc-status-badge {
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.imc-over {
+    border-color: var(--violet) !important;
+    box-shadow: 0 0 15px rgba(208, 0, 255, 0.08) inset, 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.imc-over .imc-value-display,
+.imc-over .imc-status-badge {
+    color: var(--violet);
+    text-shadow: 0 0 8px rgba(208, 0, 255, 0.35);
+}
+.imc-over .imc-status-badge {
+    background: rgba(208, 0, 255, 0.08);
+    border: 1px solid rgba(208, 0, 255, 0.2);
+}
+
+.imc-obese {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.08) inset, 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.imc-obese .imc-value-display,
+.imc-obese .imc-status-badge {
+    color: var(--red);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
+}
+.imc-obese .imc-status-badge {
+    background: rgba(255, 0, 85, 0.08);
+    border: 1px solid rgba(255, 0, 85, 0.2);
+}
+
+/* 4. Inputs de Medidas em Grid do Administrador */
+.admin-measurements-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 390px) {
+    .admin-measurements-inputs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.compact-group {
+    margin-bottom: 12px;
+}
+
+.compact-label {
+    font-size: 0.72rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.compact-input {
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    background: rgba(0,0,0,0.3);
+    border-color: rgba(255, 255, 255, 0.04);
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+}
+
+.compact-input:focus {
+    border-color: var(--violet);
+    box-shadow: 0 0 8px var(--violet-glow);
+    background: rgba(0,0,0,0.5);
+}
+

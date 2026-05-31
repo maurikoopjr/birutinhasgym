@@ -15,7 +15,11 @@ const DEFAULT_DATABASE = {
             { "id": "d7", "name": "Rosca Direta com Barra", "sets": "3", "reps": "10" },
             { "id": "d8", "name": "Tríceps Corda na Polia", "sets": "3", "reps": "12" }
         ],
-        "Treino C": []
+        "Treino C": [],
+        "medidas": {
+            "panturrilha": "34", "coxa": "54", "cintura": "70", "quadril": "95", "peitoral": "88",
+            "antebraço": "24", "biceps": "30", "triceps": "28", "ombro": "100", "peso": "58", "altura": "1.65"
+        }
     },
     "MAURI": {
         "Treino A": [
@@ -32,7 +36,11 @@ const DEFAULT_DATABASE = {
             { "id": "m9", "name": "Rosca Martelo Halteres", "sets": "4", "reps": "10" },
             { "id": "m10", "name": "Rosca Concentrada", "sets": "3", "reps": "12" }
         ],
-        "Treino C": []
+        "Treino C": [],
+        "medidas": {
+            "panturrilha": "38", "coxa": "60", "cintura": "80", "quadril": "98", "peitoral": "104",
+            "antebraço": "28", "biceps": "36", "triceps": "34", "ombro": "118", "peso": "76.5", "altura": "1.76"
+        }
     },
     "KAUAN": {
         "Treino A": [
@@ -47,7 +55,11 @@ const DEFAULT_DATABASE = {
             { "id": "k7", "name": "Rosca Inversa com Barra", "sets": "3", "reps": "12" },
             { "id": "k8", "name": "Flexão de Braço (Push-ups)", "sets": "4", "reps": "15" }
         ],
-        "Treino C": []
+        "Treino C": [],
+        "medidas": {
+            "panturrilha": "40", "coxa": "62", "cintura": "84", "quadril": "100", "peitoral": "108",
+            "antebraço": "30", "biceps": "38", "triceps": "36", "ombro": "124", "peso": "82", "altura": "1.80"
+        }
     },
     "GABI": {
         "Treino A": [
@@ -62,7 +74,11 @@ const DEFAULT_DATABASE = {
             { "id": "g7", "name": "Bicicleta Ergométrica (Intensa)", "sets": "1", "reps": "15 min" },
             { "id": "g8", "name": "Polichinelos Velocidade", "sets": "4", "reps": "50" }
         ],
-        "Treino C": []
+        "Treino C": [],
+        "medidas": {
+            "panturrilha": "32", "coxa": "50", "cintura": "66", "quadril": "90", "peitoral": "82",
+            "antebraço": "22", "biceps": "26", "triceps": "24", "ombro": "94", "peso": "52", "altura": "1.60"
+        }
     }
 };
 
@@ -83,19 +99,49 @@ class GymApp {
         this.syncWithCloud(true);
     }
 
-    // Carregar Banco de Dados do LocalStorage (Offline-First)
+    // Carregar Banco de Dados do LocalStorage (Offline-First) com Migração Dinâmica
     loadDatabase() {
         const stored = localStorage.getItem('birutinhas_gym_db');
+        let db;
         if (stored) {
             try {
-                return JSON.parse(stored);
+                db = JSON.parse(stored);
             } catch (e) {
                 console.error("Erro ao ler banco de dados do localstorage, usando padrão.", e);
+                db = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
             }
+        } else {
+            db = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
         }
-        // Inicializar com o padrão caso não exista
-        localStorage.setItem('birutinhas_gym_db', JSON.stringify(DEFAULT_DATABASE));
-        return JSON.parse(JSON.stringify(DEFAULT_DATABASE)); // Cópia profunda
+
+        // Migração dinâmica: garantir que a chave "medidas" existe para todos os usuários
+        const users = ["DUDA", "MAURI", "KAUAN", "GABI"];
+        let migrated = false;
+        users.forEach(u => {
+            if (db[u]) {
+                if (!db[u].medidas) {
+                    db[u].medidas = {
+                        panturrilha: "",
+                        coxa: "",
+                        cintura: "",
+                        quadril: "",
+                        peitoral: "",
+                        antebraço: "",
+                        biceps: "",
+                        triceps: "",
+                        ombro: "",
+                        peso: "",
+                        altura: ""
+                    };
+                    migrated = true;
+                }
+            }
+        });
+
+        if (migrated) {
+            localStorage.setItem('birutinhas_gym_db', JSON.stringify(db));
+        }
+        return db;
     }
 
     // Salvar no LocalStorage
@@ -152,6 +198,20 @@ class GymApp {
             if (adminUser === "mkj" && adminPass === "1234") {
                 this.showScreen('adminPanel');
                 this.showToast("Logado como Administrador!", "success");
+                
+                // Resetar o controle de abas do editor admin para Exercícios ao logar
+                const btnAdminWorkouts = document.getElementById('btn-admin-show-workouts');
+                const btnAdminMeasurements = document.getElementById('btn-admin-show-measurements');
+                const viewAdminWorkouts = document.getElementById('admin-workouts-view');
+                const viewAdminMeasurements = document.getElementById('admin-measurements-view');
+                
+                if (btnAdminWorkouts && btnAdminMeasurements && viewAdminWorkouts && viewAdminMeasurements) {
+                    btnAdminWorkouts.classList.add('active');
+                    btnAdminMeasurements.classList.remove('active');
+                    viewAdminWorkouts.classList.add('active');
+                    viewAdminMeasurements.classList.remove('active');
+                }
+                
                 this.renderAdminPanel();
             } else {
                 this.showToast("Credenciais incorretas!", "error");
@@ -364,6 +424,58 @@ class GymApp {
             this.logoutUser();
         });
 
+        // ==========================================================================
+        // EVENTOS DAS ABAS SEGMENTADAS (TREINO VS MEDIDAS)
+        // ==========================================================================
+
+        // 1. Alternador na Tela do Aluno
+        const btnShowWorkouts = document.getElementById('btn-show-workouts');
+        const btnShowMeasurements = document.getElementById('btn-show-measurements');
+        const viewStudentWorkouts = document.getElementById('student-workouts-view');
+        const viewStudentMeasurements = document.getElementById('student-measurements-view');
+
+        if (btnShowWorkouts && btnShowMeasurements && viewStudentWorkouts && viewStudentMeasurements) {
+            btnShowWorkouts.addEventListener('click', () => {
+                btnShowWorkouts.classList.add('active');
+                btnShowMeasurements.classList.remove('active');
+                viewStudentWorkouts.classList.add('active');
+                viewStudentMeasurements.classList.remove('active');
+                this.renderWorkoutExercises();
+            });
+
+            btnShowMeasurements.addEventListener('click', () => {
+                btnShowMeasurements.classList.add('active');
+                btnShowWorkouts.classList.remove('active');
+                viewStudentMeasurements.classList.add('active');
+                viewStudentWorkouts.classList.remove('active');
+                this.renderWorkoutMeasurements();
+            });
+        }
+
+        // 2. Alternador na Tela do Admin
+        const btnAdminShowWorkouts = document.getElementById('btn-admin-show-workouts');
+        const btnAdminShowMeasurements = document.getElementById('btn-admin-show-measurements');
+        const viewAdminWorkouts = document.getElementById('admin-workouts-view');
+        const viewAdminMeasurements = document.getElementById('admin-measurements-view');
+
+        if (btnAdminShowWorkouts && btnAdminShowMeasurements && viewAdminWorkouts && viewAdminMeasurements) {
+            btnAdminShowWorkouts.addEventListener('click', () => {
+                btnAdminShowWorkouts.classList.add('active');
+                btnAdminShowMeasurements.classList.remove('active');
+                viewAdminWorkouts.classList.add('active');
+                viewAdminMeasurements.classList.remove('active');
+                this.renderAdminPanel();
+            });
+
+            btnAdminShowMeasurements.addEventListener('click', () => {
+                btnAdminShowMeasurements.classList.add('active');
+                btnAdminShowWorkouts.classList.remove('active');
+                viewAdminMeasurements.classList.add('active');
+                viewAdminWorkouts.classList.remove('active');
+                this.renderAdminMeasurementsForm();
+            });
+        }
+
         // Configuração de Sincronização em Nuvem (Botão e Status)
         const saveCloudBtn = document.getElementById('btn-save-cloud');
         const statusBadge = document.getElementById('cloud-status-badge');
@@ -408,7 +520,7 @@ class GymApp {
         document.getElementById('login-password').value = "";
     }
 
-    // Logar Usuário
+    // Logar Usuário com redefinição de abas ativa
     loginUser(user) {
         this.currentUser = user;
         document.getElementById('user-avatar-initial').innerText = user.charAt(0);
@@ -416,6 +528,20 @@ class GymApp {
         this.currentTab = "Treino A";
         this.showScreen('workout');
         this.showToast(`Bem-vindo, ${user}! ⚡`, "success");
+        
+        // Resetar o controle de abas segmentadas para Treinos ao logar
+        const btnWorkouts = document.getElementById('btn-show-workouts');
+        const btnMeasurements = document.getElementById('btn-show-measurements');
+        const viewStudentWorkouts = document.getElementById('student-workouts-view');
+        const viewStudentMeasurements = document.getElementById('student-measurements-view');
+        
+        if (btnWorkouts && btnMeasurements && viewStudentWorkouts && viewStudentMeasurements) {
+            btnWorkouts.classList.add('active');
+            btnMeasurements.classList.remove('active');
+            viewStudentWorkouts.classList.add('active');
+            viewStudentMeasurements.classList.remove('active');
+        }
+
         this.renderWorkoutTabs();
         this.renderWorkoutExercises();
 
@@ -606,7 +732,7 @@ class GymApp {
         }
     }
 
-    // Sincroniza o banco de dados local com a nuvem (KVDB)
+    // Sincroniza o banco de dados local com a nuvem (KVDB) com Migração Adaptativa
     syncWithCloud(silent = false) {
         if (!navigator.onLine) {
             if (!silent) this.showToast("Você está offline. Usando treinos locais.", "error");
@@ -628,6 +754,26 @@ class GymApp {
                 const isValid = validKeys.every(k => data[k] !== undefined);
 
                 if (isValid) {
+                    // MIGRAR PAYLOAD ONLINE (Garantir chave medidas nas informações da nuvem)
+                    const users = ["DUDA", "MAURI", "KAUAN", "GABI"];
+                    users.forEach(u => {
+                        if (data[u] && !data[u].medidas) {
+                            data[u].medidas = {
+                                panturrilha: "",
+                                coxa: "",
+                                cintura: "",
+                                quadril: "",
+                                peitoral: "",
+                                antebraço: "",
+                                biceps: "",
+                                triceps: "",
+                                ombro: "",
+                                peso: "",
+                                altura: ""
+                            };
+                        }
+                    });
+
                     const oldStr = JSON.stringify(this.db);
                     const newStr = JSON.stringify(data);
                     
@@ -637,11 +783,21 @@ class GymApp {
                         
                         // Atualizar as telas que estão ativas na hora
                         if (this.currentUser) {
-                            this.renderWorkoutTabs();
-                            this.renderWorkoutExercises();
+                            const viewStudentMeasurements = document.getElementById('student-measurements-view');
+                            if (viewStudentMeasurements && viewStudentMeasurements.classList.contains('active')) {
+                                this.renderWorkoutMeasurements();
+                            } else {
+                                this.renderWorkoutTabs();
+                                this.renderWorkoutExercises();
+                            }
                         }
                         if (this.screens.adminPanel.classList.contains('active')) {
-                            this.renderAdminPanel();
+                            const viewAdminMeasurements = document.getElementById('admin-measurements-view');
+                            if (viewAdminMeasurements && viewAdminMeasurements.classList.contains('active')) {
+                                this.renderAdminMeasurementsForm();
+                            } else {
+                                this.renderAdminPanel();
+                            }
                         }
                         
                         if (!silent) this.showToast("Treinos atualizados da nuvem! ⚡", "success");
@@ -689,6 +845,166 @@ class GymApp {
                 btn.style.opacity = "1";
             }
         });
+    }
+
+    // ==========================================================================
+    // MÉTODOS COMPLEMENTARES - MÓDULO DE MEDIDAS & IMC
+    // ==========================================================================
+
+    // Cálculo dinâmico e classificação de IMC
+    calculateIMC(pesoStr, alturaStr) {
+        const peso = parseFloat(pesoStr?.replace(',', '.'));
+        const altura = parseFloat(alturaStr?.replace(',', '.'));
+        
+        if (isNaN(peso) || isNaN(altura) || peso <= 0 || altura <= 0) {
+            return {
+                value: "-",
+                badge: "PENDENTE",
+                class: "imc-normal",
+                desc: "Preencha o peso e a altura no painel de medidas para calcular seu IMC automaticamente."
+            };
+        }
+        
+        const imc = peso / (altura * altura);
+        const imcFixed = imc.toFixed(1);
+        
+        if (imc < 18.5) {
+            return {
+                value: imcFixed,
+                badge: "ABAIXO DO PESO",
+                class: "imc-under",
+                desc: "Seu Índice de Massa Corporal indica que você está abaixo da faixa recomendada. Foque em superavit calórico e treinos de força! 💪"
+            };
+        } else if (imc >= 18.5 && imc < 25) {
+            return {
+                value: imcFixed,
+                badge: "PESO NORMAL",
+                class: "imc-normal",
+                desc: "Parabéns! Seu Índice de Massa Corporal está na faixa saudável recomendada pela OMS. Continue mantendo seus bons hábitos! ⚡"
+            };
+        } else if (imc >= 25 && imc < 30) {
+            return {
+                value: imcFixed,
+                badge: "SOBREPESO",
+                class: "imc-over",
+                desc: "Seu Índice de Massa Corporal indica sobrepeso leve. Não desanime! Mantenha a consistência nos treinos e ajuste a alimentação."
+            };
+        } else {
+            return {
+                value: imcFixed,
+                badge: "OBESIDADE",
+                class: "imc-obese",
+                desc: "Seu Índice de Massa Corporal está na faixa de obesidade. Foque em consistência, reeducação alimentar e treinos cardiovasculares."
+            };
+        }
+    }
+
+    // Renderiza as medidas salvas para o Aluno
+    renderWorkoutMeasurements() {
+        const grid = document.getElementById('student-measurements-grid');
+        const imcCard = document.getElementById('student-imc-card');
+        if (!grid || !imcCard) return;
+        
+        const medidas = this.db[this.currentUser]?.medidas || {
+            panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
+            antebraço: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
+        };
+        
+        const labels = {
+            panturrilha: "Panturrilha",
+            coxa: "Coxa",
+            cintura: "Cintura",
+            quadril: "Quadril",
+            peitoral: "Peitoral",
+            antebraço: "Antebraço",
+            biceps: "Bíceps",
+            triceps: "Tríceps",
+            ombro: "Ombro",
+            peso: "Peso",
+            altura: "Altura"
+        };
+        
+        const suffixes = {
+            peso: " kg",
+            altura: " m"
+        };
+        
+        grid.innerHTML = "";
+        Object.keys(labels).forEach(key => {
+            const suffix = suffixes[key] || " cm";
+            const val = medidas[key] ? `${medidas[key]}${suffix}` : "--";
+            
+            const item = document.createElement('div');
+            item.className = "measurement-item-box";
+            item.innerHTML = `
+                <span class="measurement-item-label">${labels[key]}</span>
+                <span class="measurement-item-value">${val}</span>
+            `;
+            grid.appendChild(item);
+        });
+        
+        // Calcular e Renderizar IMC do Aluno
+        const imcInfo = this.calculateIMC(medidas.peso, medidas.altura);
+        imcCard.className = `login-card imc-result-card ${imcInfo.class}`;
+        imcCard.innerHTML = `
+            <div class="imc-header-row">
+                <span class="imc-title">Cálculo de IMC</span>
+                <span class="imc-status-badge">${imcInfo.badge}</span>
+            </div>
+            <div class="imc-value-display">${imcInfo.value}</div>
+            <p class="imc-desc">${imcInfo.desc}</p>
+        `;
+    }
+
+    // Carrega e gerencia os formulários administrativos de medidas
+    renderAdminMeasurementsForm() {
+        const form = document.getElementById('admin-measurements-form');
+        if (!form) return;
+        
+        const medidas = this.db[this.adminSelectedUser]?.medidas || {
+            panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
+            antebraço: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
+        };
+        
+        const keys = ["panturrilha", "coxa", "cintura", "quadril", "peitoral", "antebraço", "biceps", "triceps", "ombro", "peso", "altura"];
+        
+        keys.forEach(key => {
+            const input = document.getElementById(`m-${key}`);
+            if (input) {
+                input.value = medidas[key] || "";
+                
+                // Gravação instantânea no LocalStorage ao digitar
+                input.oninput = () => {
+                    if (!this.db[this.adminSelectedUser].medidas) {
+                        this.db[this.adminSelectedUser].medidas = {};
+                    }
+                    this.db[this.adminSelectedUser].medidas[key] = input.value.trim();
+                    this.saveDatabase();
+                    this.renderAdminIMCLive();
+                };
+            }
+        });
+        
+        this.renderAdminIMCLive();
+    }
+
+    // Prévia IMC ao vivo para o Admin
+    renderAdminIMCLive() {
+        const imcCard = document.getElementById('admin-imc-live-card');
+        if (!imcCard) return;
+        
+        const medidas = this.db[this.adminSelectedUser]?.medidas || { peso: "", altura: "" };
+        const imcInfo = this.calculateIMC(medidas.peso, medidas.altura);
+        
+        imcCard.className = `login-card imc-result-card ${imcInfo.class}`;
+        imcCard.innerHTML = `
+            <div class="imc-header-row">
+                <span class="imc-title">IMC Prévia (Ao Vivo)</span>
+                <span class="imc-status-badge">${imcInfo.badge}</span>
+            </div>
+            <div class="imc-value-display">${imcInfo.value}</div>
+            <p class="imc-desc" style="font-size: 0.78rem; margin-top: 4px;">Alterações salvas localmente ao digitar. Clique no botão de Salvar no final da página para publicar as alterações na Nuvem.</p>
+        `;
     }
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'birutinhas-gym-v12';
+const CACHE_NAME = 'birutinhas-gym-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
