@@ -844,8 +844,8 @@ class GymApp {
             return;
         }
 
-        // Usamos um bucket exclusivo e seguro no KVDB.io para sincronizar os dados
-        fetch('https://kvdb.io/EK1hddFu2Eg2XpuPrq9Vpz/workouts')
+        // Usamos um bucket exclusivo e seguro no KVDB.io para sincronizar os dados (Bypass HTTP Cache)
+        fetch('https://kvdb.io/EK1hddFu2Eg2XpuPrq9Vpz/workouts?t=' + Date.now(), { cache: 'no-store' })
             .then(res => {
                 if (res.status === 404) {
                     // Se o banco ainda não existe na nuvem, inicializa salvando o padrão
