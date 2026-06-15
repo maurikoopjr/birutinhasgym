@@ -1,4 +1,4 @@
-const CACHE_NAME = 'birutinhas-gym-v16';
+const CACHE_NAME = 'birutinhas-gym-v17';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -43,6 +43,13 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   // Apenas processa requisições HTTP normais (GET)
   if (event.request.method !== 'GET') return;
+
+  // IMPORTANTE: Não interceptar ou cachear chamadas de API externas (como KVDB.io)
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) {
+    // Permite que requisições externas (sincronização na nuvem) usem a rede diretamente
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
