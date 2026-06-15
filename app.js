@@ -236,6 +236,11 @@ class GymApp {
                     buttons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     this.adminSelectedUser = btn.getAttribute('data-value');
+                    
+                    // Fechar o painel de cópia se mudar de aluno para recarregar as opções corretamente
+                    const adminCopyPanel = document.getElementById('admin-copy-panel');
+                    if (adminCopyPanel) adminCopyPanel.style.display = 'none';
+                    
                     this.renderAdminPanel();
                 });
             });
@@ -513,6 +518,67 @@ class GymApp {
         if (saveCloudBtn) {
             saveCloudBtn.addEventListener('click', () => {
                 this.saveToCloud(false);
+            });
+        }
+
+        // Lógica de Copiar Planilhas de Treino Entre Alunos
+        const btnToggleCopy = document.getElementById('btn-admin-toggle-copy');
+        const adminCopyPanel = document.getElementById('admin-copy-panel');
+        const sourceSelect = document.getElementById('admin-copy-source-select');
+        const btnCancelCopy = document.getElementById('btn-admin-cancel-copy');
+        const btnDoCopy = document.getElementById('btn-admin-do-copy');
+
+        if (btnToggleCopy && adminCopyPanel && sourceSelect && btnCancelCopy && btnDoCopy) {
+            btnToggleCopy.addEventListener('click', () => {
+                if (adminCopyPanel.style.display === 'none' || adminCopyPanel.style.display === '') {
+                    // Preencher o select excluindo o aluno atual
+                    sourceSelect.innerHTML = '';
+                    const users = ["DUDA", "MAURI", "KAUAN", "GABI"];
+                    users.forEach(u => {
+                        if (u !== this.adminSelectedUser) {
+                            const opt = document.createElement('option');
+                            opt.value = u;
+                            opt.innerText = u;
+                            sourceSelect.appendChild(opt);
+                        }
+                    });
+                    adminCopyPanel.style.display = 'block';
+                } else {
+                    adminCopyPanel.style.display = 'none';
+                }
+            });
+
+            btnCancelCopy.addEventListener('click', () => {
+                adminCopyPanel.style.display = 'none';
+            });
+
+            btnDoCopy.addEventListener('click', () => {
+                const sourceUser = sourceSelect.value;
+                if (!sourceUser) return;
+
+                const confirmMsg = `Isso apagará TODOS os treinos (A, B, C, D, E) de ${this.adminSelectedUser} e os substituirá pelas cópias dos treinos de ${sourceUser}.\n\nDeseja continuar?`;
+                if (confirm(confirmMsg)) {
+                    const workouts = ["Treino A", "Treino B", "Treino C", "Treino D", "Treino E"];
+                    
+                    if (!this.db[this.adminSelectedUser]) {
+                        this.db[this.adminSelectedUser] = {};
+                    }
+
+                    workouts.forEach(tab => {
+                        const sourceExercises = this.db[sourceUser][tab] || [];
+                        this.db[this.adminSelectedUser][tab] = sourceExercises.map(ex => ({
+                            id: Math.random().toString(36).substring(2, 9),
+                            name: ex.name,
+                            sets: ex.sets,
+                            reps: ex.reps
+                        }));
+                    });
+
+                    this.saveDatabase();
+                    this.renderAdminPanel();
+                    this.showToast(`Treinos copiados de ${sourceUser} para ${this.adminSelectedUser}! ⚡`, "success");
+                    adminCopyPanel.style.display = 'none';
+                }
             });
         }
 

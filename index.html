@@ -35,7 +35,7 @@
         
         <header class="cyber-header" id="main-header" style="display: flex; flex-direction: column; align-items: center;">
             <img src="icon-192.png" alt="Birutinhas Gym Logo" style="width: 90px; height: 90px; border-radius: 22px; border: 2px solid var(--violet); box-shadow: 0 0 20px var(--violet-glow); margin-bottom: 15px;">
-            <div class="logo-tech">System v1.5 // Workout Offline</div>
+            <div class="logo-tech">System v1.6 // Workout Offline</div>
             <h1 class="logo-main" style="margin-top: 5px;">BIRUTINHAS GYM</h1>
         </header>
 
@@ -210,6 +210,28 @@
 
             <!-- 4.1 View de Edição de Exercícios (Treinos) -->
             <div id="admin-workouts-view" class="segmented-view active">
+                
+                <!-- Botão de Ação Rápida: Copiar Ficha de Outro Aluno -->
+                <button type="button" id="btn-admin-toggle-copy" class="btn-cyber btn-outline" style="margin-top: 5px; margin-bottom: 15px; font-size: 0.8rem; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 6px; border-color: var(--violet); color: var(--violet); box-shadow: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                    COPIAR TREINOS DE OUTRO ALUNO ⚡
+                </button>
+
+                <!-- Painel expansivo de cópia -->
+                <div class="copy-workout-panel" id="admin-copy-panel" style="display: none; background: rgba(208, 0, 255, 0.05); border: 1px solid rgba(208, 0, 255, 0.15); border-radius: 10px; padding: 12px; margin-bottom: 20px;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: var(--violet); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">COPIAR TODAS AS PLANILHAS</div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Copiar de:</span>
+                        <div style="display: flex; gap: 8px; width: 100%; align-items: center; margin-top: 4px;">
+                            <select id="admin-copy-source-select" class="select-cyber" style="flex: 1; padding: 8px 12px; font-size: 0.85rem; height: 38px; background-position: right 10px center;">
+                                <!-- Preenchido dinamicamente via JS -->
+                            </select>
+                            <button type="button" id="btn-admin-do-copy" class="btn-cyber btn-cyber-violet" style="width: auto; padding: 0 16px; height: 38px; font-size: 0.8rem;">CONFIRMAR ⚡</button>
+                            <button type="button" id="btn-admin-cancel-copy" class="btn-cyber btn-outline" style="width: auto; padding: 0 14px; height: 38px; font-size: 0.8rem; margin-top: 0; border-color: rgba(255,255,255,0.15);">X</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Seleção de Planilha de Treino (Dropdown customizado de alta fidelidade) -->
                 <div class="form-group" style="margin-bottom: 25px; position: relative;">
                     <label class="form-label" style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">PLANILHA DE TREINO</label>
