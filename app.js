@@ -16,6 +16,8 @@ const DEFAULT_DATABASE = {
             { "id": "d8", "name": "Tríceps Corda na Polia", "sets": "3", "reps": "12" }
         ],
         "Treino C": [],
+        "Treino D": [],
+        "Treino E": [],
         "medidas": {
             "panturrilha": "34", "coxa": "54", "cintura": "70", "quadril": "95", "peitoral": "88",
             "antebraco": "24", "biceps": "30", "triceps": "28", "ombro": "100", "peso": "58", "altura": "1.65"
@@ -37,6 +39,8 @@ const DEFAULT_DATABASE = {
             { "id": "m10", "name": "Rosca Concentrada", "sets": "3", "reps": "12" }
         ],
         "Treino C": [],
+        "Treino D": [],
+        "Treino E": [],
         "medidas": {
             "panturrilha": "38", "coxa": "60", "cintura": "80", "quadril": "98", "peitoral": "104",
             "antebraco": "28", "biceps": "36", "triceps": "34", "ombro": "118", "peso": "76.5", "altura": "1.76"
@@ -56,6 +60,8 @@ const DEFAULT_DATABASE = {
             { "id": "k8", "name": "Flexão de Braço (Push-ups)", "sets": "4", "reps": "15" }
         ],
         "Treino C": [],
+        "Treino D": [],
+        "Treino E": [],
         "medidas": {
             "panturrilha": "40", "coxa": "62", "cintura": "84", "quadril": "100", "peitoral": "108",
             "antebraco": "30", "biceps": "38", "triceps": "36", "ombro": "124", "peso": "82", "altura": "1.80"
@@ -75,6 +81,8 @@ const DEFAULT_DATABASE = {
             { "id": "g8", "name": "Polichinelos Velocidade", "sets": "4", "reps": "50" }
         ],
         "Treino C": [],
+        "Treino D": [],
+        "Treino E": [],
         "medidas": {
             "panturrilha": "32", "coxa": "50", "cintura": "66", "quadril": "90", "peitoral": "82",
             "antebraco": "22", "biceps": "26", "triceps": "24", "ombro": "94", "peso": "52", "altura": "1.60"
@@ -114,25 +122,24 @@ class GymApp {
             db = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
         }
 
-        // Migração dinâmica: garantir que a chave "medidas" existe para todos os usuários
+        // Migração dinâmica: garantir que "medidas", "Treino D" e "Treino E" existem para todos os usuários
         const users = ["DUDA", "MAURI", "KAUAN", "GABI"];
         let migrated = false;
         users.forEach(u => {
             if (db[u]) {
                 if (!db[u].medidas) {
                     db[u].medidas = {
-                        panturrilha: "",
-                        coxa: "",
-                        cintura: "",
-                        quadril: "",
-                        peitoral: "",
-                        antebraco: "",
-                        biceps: "",
-                        triceps: "",
-                        ombro: "",
-                        peso: "",
-                        altura: ""
+                        panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
+                        antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
                     };
+                    migrated = true;
+                }
+                if (!db[u]["Treino D"]) {
+                    db[u]["Treino D"] = [];
+                    migrated = true;
+                }
+                if (!db[u]["Treino E"]) {
+                    db[u]["Treino E"] = [];
                     migrated = true;
                 }
             }
@@ -567,7 +574,7 @@ class GymApp {
         const tabsContainer = document.getElementById('workout-tabs-container');
         tabsContainer.innerHTML = "";
         
-        const tabs = ["Treino A", "Treino B", "Treino C"];
+        const tabs = ["Treino A", "Treino B", "Treino C", "Treino D", "Treino E"];
         tabs.forEach(tab => {
             const btn = document.createElement('button');
             btn.className = `tab-btn ${this.currentTab === tab ? 'active' : ''}`;
@@ -586,7 +593,8 @@ class GymApp {
         const listContainer = document.getElementById('workout-exercise-list');
         listContainer.innerHTML = "";
 
-        const exercises = this.db[this.currentUser]?.[this.currentTab] || [];
+        const userDb = this.db[this.currentUser];
+        const exercises = (userDb && userDb[this.currentTab]) ? userDb[this.currentTab] : [];
 
         if (exercises.length === 0) {
             listContainer.innerHTML = `
@@ -639,7 +647,8 @@ class GymApp {
         if (!gridContainer) return;
         gridContainer.innerHTML = "";
 
-        const exercises = this.db[this.adminSelectedUser]?.[this.adminSelectedTab] || [];
+        const adminUserDb = this.db[this.adminSelectedUser];
+        const exercises = (adminUserDb && adminUserDb[this.adminSelectedTab]) ? adminUserDb[this.adminSelectedTab] : [];
 
         // Atualizar aba ativa no título de forma segura
         const tabTitle = document.getElementById('admin-title-tab');
@@ -736,7 +745,27 @@ class GymApp {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registrado com sucesso!', reg.scope))
+                    .then(reg => {
+                        console.log('Service Worker registrado com sucesso!', reg.scope);
+                        
+                        // Detectar atualizações do Service Worker e recarregar a página
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed') {
+                                        if (navigator.serviceWorker.controller) {
+                                            console.log('Nova versão do PWA instalada, recarregando...');
+                                            this.showToast("Nova versão do app disponível! Recarregando... ⚡", "success");
+                                            setTimeout(() => {
+                                                window.location.reload();
+                                            }, 1500);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    })
                     .catch(err => console.warn('Falha ao registrar Service Worker:', err));
             });
         }
@@ -767,20 +796,19 @@ class GymApp {
                     // MIGRAR PAYLOAD ONLINE (Garantir chave medidas nas informações da nuvem)
                     const users = ["DUDA", "MAURI", "KAUAN", "GABI"];
                     users.forEach(u => {
-                        if (data[u] && !data[u].medidas) {
-                            data[u].medidas = {
-                                panturrilha: "",
-                                coxa: "",
-                                cintura: "",
-                                quadril: "",
-                                peitoral: "",
-                                antebraco: "",
-                                biceps: "",
-                                triceps: "",
-                                ombro: "",
-                                peso: "",
-                                altura: ""
-                            };
+                        if (data[u]) {
+                            if (!data[u].medidas) {
+                                data[u].medidas = {
+                                    panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
+                                    antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
+                                };
+                            }
+                            if (!data[u]["Treino D"]) {
+                                data[u]["Treino D"] = [];
+                            }
+                            if (!data[u]["Treino E"]) {
+                                data[u]["Treino E"] = [];
+                            }
                         }
                     });
 
@@ -926,7 +954,8 @@ class GymApp {
         const imcCard = document.getElementById('student-imc-card');
         if (!grid || !imcCard) return;
         
-        const medidas = this.db[this.currentUser]?.medidas || {
+        const currentUserDb = this.db[this.currentUser];
+        const medidas = (currentUserDb && currentUserDb.medidas) ? currentUserDb.medidas : {
             panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
             antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
         };
@@ -982,7 +1011,8 @@ class GymApp {
         const form = document.getElementById('admin-measurements-form');
         if (!form) return;
         
-        const medidas = this.db[this.adminSelectedUser]?.medidas || {
+        const selectedUserDb = this.db[this.adminSelectedUser];
+        const medidas = (selectedUserDb && selectedUserDb.medidas) ? selectedUserDb.medidas : {
             panturrilha: "", coxa: "", cintura: "", quadril: "", peitoral: "",
             antebraco: "", biceps: "", triceps: "", ombro: "", peso: "", altura: ""
         };
@@ -1014,7 +1044,8 @@ class GymApp {
         const imcCard = document.getElementById('admin-imc-live-card');
         if (!imcCard) return;
         
-        const medidas = this.db[this.adminSelectedUser]?.medidas || { peso: "", altura: "" };
+        const liveUserDb = this.db[this.adminSelectedUser];
+        const medidas = (liveUserDb && liveUserDb.medidas) ? liveUserDb.medidas : { peso: "", altura: "" };
         const imcInfo = this.calculateIMC(medidas.peso, medidas.altura);
         
         imcCard.className = `login-card imc-result-card ${imcInfo.class}`;
